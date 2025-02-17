@@ -13,7 +13,7 @@ const getAllCategories = async (req, res) => {
 //Get Category By ID
 const getCategoryById = async (req, res) => {
     try {
-        const data = await data.findById(req.params.id);
+        const data = await Category.findById(req.params.id);
         if (!data) {
             return res.send({ message: "Category Not Found..!" });
         }
@@ -26,29 +26,16 @@ const getCategoryById = async (req, res) => {
 //createCategory if the role is admin
 const createCategory = async (req, res) => {
     try {
-        if (!req.User || req.User.role !== 'admin') {
-            return res.status(403).json({ message: "Access Denided Only Admin can Create Category..!" });
-        }
+        const newCategory = await Category.findOne({ category_name: req.body.category_name });
 
-        const { category_name, category_description, category_images } = req.body;
+        if (newCategory) return res.status(400).json({ message: "Category already exists" });
 
-        if (!category_name) {
-            return res.status(400).json({ message: "Category_name is Required..!" });
-        }
-        const newCategory = new Category({
-            category_name,
-            category_description,
-            category_images,
-            category_updated_at: Date.now()
-        });
-
-        await newCategory.save();
-        res.send({ message: "Category Created Successfully..!", Category: newCategory });
+        await Category.create(req.body);
+        res.json({ message: "Category Created Successfully..!" });
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error" });
     }
-    catch (error) {
-        res.send(error);
-    }
-};
+}
 
 //Delete Category if the role is admin
 const deleteCategory = async (req, res) => {
@@ -71,7 +58,7 @@ const deleteCategory = async (req, res) => {
 //Update Categroy if the role is admin
 const updateCategory = async (req, res) => {
     try {
-        if (!req.user || req.user.role !== "admin") {
+        if (req.user.role !== "admin") {
             return res.status(403).json({ message: "Access Denied Only Admin can Update Category..!" });
         }
 

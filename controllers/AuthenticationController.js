@@ -1,24 +1,32 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
-const { } = require('../models/User');
+const User = require('../models/User');
 
 //registeration for new User
 const register_User = async (req, res) => {
     try {
-        const { user_name, user_contact, user_email, user_password, user_confirmpassword, user_address, user_DOB, user_role } = req.body;
+        console.log("Received Request Body:", req.body); // Debugging step
 
+        const { user_name, user_contact, user_email, user_password, user_confirmpassword, user_address, user_DOB, user_role } = req.body;
+        
         if (!user_email || !user_password || !user_confirmpassword) {
-            return res.send({ message: "Email & password are required..!" })
+            return res.status(400).json({ message: "Email & password are required..!" });
         }
         if (user_password !== user_confirmpassword) {
-            return res.send({ message: "Password doesn't Match..!" })
+            return res.status(400).json({ message: "Password doesn't match!" });
         }
-        const existingUser = await User.findOne({ user_email: req.body.user_email });
+
+        // Debug: Check if user exists
+        const existingUser = await User.findOne({ user_email });
+        console.log("Existing User:", existingUser);
+
         if (existingUser) {
-            return res.send({ message: "This User already exists..!" });
+            return res.status(409).json({ message: "This user already exists!" });
         }
 
         const hashedPassword = await bcrypt.hash(user_password, 10);
+        console.log("Hashed Password:", hashedPassword);
+
         const newUser = new User({
             user_name,
             user_contact,
@@ -30,12 +38,15 @@ const register_User = async (req, res) => {
         });
 
         await newUser.save();
-        res.send({ message: "New User Created..!", user: newUser });
+        console.log("New User Created:", newUser);
+
+        res.status(201).json({ message: "User registered successfully!", user: newUser });
+    } catch (error) {
+        console.error("Error during registration:", error);
+        res.status(500).json({ message: "Internal Server Error", error });
     }
-    catch (error) {
-        res.send(error);
-    }
-}
+};
+
 
 //login for existing user
 const login_User = async (req, res) => {

@@ -4,6 +4,9 @@ const bcrypt = require("bcrypt");
 // Get All Users
 const getAllUsers = async (req, res) => {
     try {
+        if (req.user.role !== "admin") {
+            return res.status(403).json({ message: "Access Denied Only Admin can Update Category..!" });
+        }
         const data = await User.find();
         res.send(data);
     } catch (error) {

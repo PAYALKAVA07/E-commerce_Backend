@@ -5,9 +5,10 @@ const roles = require('../config/roles');
 const authenticate = (req,res,next) =>{
     console.log(req.headers);
 
-    const token = req.headers["authorization"];
+    const token = req.headers["value"];
+    console.log("hii",token)
 
-    if(!token || !token.startsWith("Bearer ")){
+    if(!token){
         return res.send({message :"Access Denided No token Provided..!"})
     }
     try {
@@ -20,10 +21,15 @@ const authenticate = (req,res,next) =>{
     }
 }
 
-const authorize = (role,action)=>{
-    if(!roles[role] || !roles[role].includes(action)){
-        return res.send({message:"Access Denied for Authorize..!"});
+const authorize = (action) => (req, res, next) => {
+
+    const userRole = req.user.role;
+    if(!roles[userRole] || !roles[userRole].includes(action)) {
+        return res.status(403).json({ message: "Access Denied for authorize" });
     }
     next();
 }
+
+
+
 module.exports = {authenticate,authorize};
