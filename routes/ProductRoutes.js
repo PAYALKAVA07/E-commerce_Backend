@@ -1,68 +1,22 @@
 const express = require("express");
-const Product = require('../models/Product');
+const { getAllProduct, getProductById, insertProduct, updateProduct, deleteProduct } = require('../controllers/ProductController');
+const {authenticate,authorize} = require('../middleware/AuthenticationMiddleware');
+
 const router = express.Router();
 
 //getall
-router.get('/', async (req, res) => {
-  const data = await Product.find().populate('categoryID discountID');
-  res.send(data);
-});
+router.get('/', authenticate,authorize("getAllProduct"),getAllProduct);
 
 //getById
-router.get('/:id', async (req, res) => {
-  try {
-    const data = await Product.findById(req.params.id).populate('categoryID discountID');
-    if (!data) {
-      return res.send({ message: "Product not found" });
-    }
-    res.send(data);
-  }
-  catch (error) {
-    res.send(error);
-  }
-});
+router.get('/:id', authenticate,authorize("getProductById"),getProductById);
 
 //insertProduct
-router.post("/", async (req, res) => {
-  try {
-    const existingProduct = await Product.findOne({ product_name: req.body.product_name });
-    if (existingProduct) {
-      return res.send({ message: "This Product already exists" });
-    }
-    const data = await Product.create(req.body);
-    res.send({message:"Data Inserted Successfully",data:data});
-  }
-  catch (error) {
-    res.send(error);
-  }
-});
+router.post("/", authenticate,authorize("insertProduct"),insertProduct);
 
 //updateProduct
-router.patch('/:id', async (req, res) => {
-  try {
-    const data = await Product.findByIdAndUpdate(req.params.id, req.body);
-    if (!data) {
-      return res.send({ message: "Product not found" });
-    }
-    res.send(data);
-  }
-  catch (error) {
-    res.send(error);
-  }
-});
+router.patch('/:id', authenticate,authorize("updateProduct"),updateProduct);
 
 //DeleteProduct
-router.delete('/:id', async (req, res) => {
-  try {
-    const data = await Product.findByIdAndDelete(req.params.id)
-    if (!data) {
-      return res.send({ message: "Product not found" });
-    }
-    res.send(data);
-  }
-  catch (error) {
-    res.send(error);
-  }
-});
+router.delete('/:id',authenticate,authorize("deleteProduct"),deleteProduct);
 
 module.exports = router;

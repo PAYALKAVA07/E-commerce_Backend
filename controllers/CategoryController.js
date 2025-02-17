@@ -24,7 +24,7 @@ const getCategoryById = async (req, res) => {
 }
 
 //createCategory if the role is admin
-const createCategory = async (req, res) => {
+const insertCategory = async (req, res) => {
     try {
         const newCategory = await Category.findOne({ category_name: req.body.category_name });
 
@@ -83,4 +83,4 @@ const updateCategory = async (req, res) => {
     }
 };
 
-module.exports = { getAllCategories, getCategoryById, createCategory, deleteCategory, updateCategory };
+module.exports = { getAllCategories, getCategoryById, insertCategory, deleteCategory, updateCategory };

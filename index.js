@@ -7,6 +7,8 @@ const userRoute = require('./routes/UserRoutes');
 const categoryRoutes = require('./routes/CategoryRoutes');
 const discountRoutes = require('./routes/DiscountRoutes');
 const productRoutes = require('./routes/ProductRoutes');
+const couponRoutes = require('./routes/CouponRoutes');
+const ReviewRatingRoutes = require('./routes/ReviewRatingRoutes');
 const cartRoutes = require('./routes/CartRoutes');
 
 mongoose.connect(process.env.atlasUrl).then(() => {
@@ -15,15 +17,16 @@ mongoose.connect(process.env.atlasUrl).then(() => {
     const app = express();
 
     // app.use(bodyParser.json());
-    app.use(express.json());  // Ensure JSON body parsing
-    app.use(express.urlencoded({ extended: true })); // Parse URL-encoded data
-
+    app.use(express.json());  
+    app.use(express.urlencoded({ extended: true }));
 
     app.use('/auth', authRoutes);
     app.use('/users', userRoute);
     app.use('/categories', categoryRoutes);
     app.use('/discounts', discountRoutes);
     app.use('/products', productRoutes);
+    app.use('/coupons',couponRoutes);
+    app.use('/review-rating',ReviewRatingRoutes);
     app.use('/carts', cartRoutes);
 
     app.listen(process.env.PORT, () => {

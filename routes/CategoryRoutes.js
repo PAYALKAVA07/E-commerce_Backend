@@ -1,5 +1,5 @@
 const express = require("express");
-const { getAllCategories, getCategoryById, createCategory, deleteCategory, updateCategory }= require('../controllers/CategoryController');
+const { getAllCategories, getCategoryById, insertCategory, deleteCategory, updateCategory }= require('../controllers/CategoryController');
 const {authenticate,authorize} = require('../middleware/AuthenticationMiddleware');
 
 const router = express.Router();
@@ -11,7 +11,7 @@ router.get("/", authenticate, authorize("getAllCategories"), getAllCategories);
 router.get("/:id", authenticate, authorize("getCategoryById"), getCategoryById);
 
 //create Category
-router.post("/", authenticate, authorize("createCategory"), createCategory);
+router.post("/", authenticate, authorize("insertCategory"), insertCategory);
 
 //update Category
 router.patch("/:id", authenticate, authorize("updateCategory"), updateCategory);
