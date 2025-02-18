@@ -1,4 +1,6 @@
-const ReviewRating = require('../models/ReviewRating');
+const User = require('../models/User'); 
+const Product = require('../models/Product'); 
+const ReviewRating = require('../models/ReviewRating'); 
 
 //getAll ReviewRating
 const allReviewRating = async (req, res) => {
@@ -14,16 +16,19 @@ const allReviewRating = async (req, res) => {
 //get ReviewRating by product
 const Product_ReviewRating = async (req, res) => {
     try {
-        const ReviewRatings = await ReviewRating.findById(req.params.productID);
-        if (!ReviewRating.length) {
-            return res.send({ message: "There Is No Review & Rating are Available For this Product..!" });
+        const ReviewRatings = await ReviewRating.find({ productID: req.params.productId });
+
+        if (!ReviewRatings.length) { 
+            return res.status(404).json({ message: "There are no reviews & ratings available for this product." });
         }
-        res.send(ReviewRatings);
+
+        res.status(200).json(ReviewRatings);
+    } catch (error) {
+        console.error("Error fetching reviews:", error);
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
-    catch (error) {
-        res.send(error);
-    }
-}
+};
+
 
 //get ReviewRating by Id
 const getReviewRatingById = async (req, res) => {
@@ -42,29 +47,38 @@ const getReviewRatingById = async (req, res) => {
 //insert ReviewRating
 const insertReviewRating = async (req, res) => {
     try {
-        // const { productId } = req.params;
-        const { rating, comment } = req.body;
-        const userID = req.user.user_id;
+        const { rating, review } = req.body;
+        const userID = req.user?.userID;
 
-        // Validate input fields
+        console.log("req.user:", req.user); 
+        console.log("req.body:", req.body);
+
         if (!userID || !rating) return res.send({ message: 'User ID and rating are required' });
         if (rating < 1 || rating > 5) return res.send({ message: 'Rating must be between 1 and 5' });
-        t
+
         const [userExists, productExists] = await Promise.all([
             User.findById(userID),
-            Product.findById(req.params.id)
+            Product.findById(req.params.productId)
         ]);
 
         if (!userExists) return res.send({ message: 'User Not Found..!' });
         if (!productExists) return res.send({ message: 'Product Not Found..!' });
-        const ReviewRating = new ReviewRating({ user_id: userID, product_id: req.params.id, review, rating, review_date: Date.now() });
-        await ReviewRating.save();
 
-        res.send({ message: 'ReviewRating submitted successfully', ReviewRating });
+        const newReview = new ReviewRating({ 
+            userID, 
+            productID: req.params.productId, 
+            review, 
+            rating, 
+            review_date: Date.now() 
+        });
+
+        await newReview.save();
+        res.send({ message: 'Review submitted successfully', newReview });
     } catch (error) {
-        res.send(error);
+        console.error("Error inserting review:", error);
+        res.status(500).send({ message: "Internal Server Error", error });
     }
-}
+};
 
 //update ReviewRating
 const updateReviewRating = async (req, res) => {

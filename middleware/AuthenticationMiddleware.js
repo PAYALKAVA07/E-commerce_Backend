@@ -6,7 +6,7 @@ const authenticate = (req,res,next) =>{
     console.log(req.headers);
 
     const token = req.headers["value"];
-    console.log("hii",token)
+    console.log("Token:",token)
 
     if(!token){
         return res.send({message :"Access Denided No token Provided..!"})
@@ -29,7 +29,5 @@ const authorize = (action) => (req, res, next) => {
     }
     next();
 }
-
-
 
 module.exports = {authenticate,authorize};

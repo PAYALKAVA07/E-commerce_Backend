@@ -6,6 +6,9 @@ const cartSchema = mongoose.Schema({
         quantity: Number
     }],
     userID: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    cart_productlimit: { type: Number, require: true },
+    cart_created_at: { type: Date, default: Date.now },
+    cart_updated_at: { type: Date, default: Date.now }
 })
 
-module.exports = mongoose.model('Cart',cartSchema)
+module.exports = mongoose.model('Cart', cartSchema)
