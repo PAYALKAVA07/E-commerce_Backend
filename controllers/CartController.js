@@ -109,39 +109,31 @@ const insertProductInCart = async (req, res) => {
     }
 };
 
-
 // Update product quantity in cart
 const updateCartProduct = async (req, res) => {
     try {
-        const cartLimit = parseInt(process.env.CART_LIMIT); // Default limit if not set
-        const userId = req.user.userID; // Assume user info is in req.user
-        const { productID, quantity } = req.body; // Product details from request body
+        const cartLimit = parseInt(process.env.CART_LIMIT); 
+        const userId = req.user.userID; 
+        const { productID, quantity } = req.body; 
 
         let cart = await Cart.findOne({ userID: userId });
 
-        // If no cart exists, return an error
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
         }
 
-        // Find the existing product in the cart
         const existingProduct = cart.cart_products.find(item => item.productID.toString() === productID);
-
-        // If product doesn't exist, return an error
         if (!existingProduct) {
             return res.status(404).json({ message: "Product not found in cart" });
         }
 
-        // Calculate the total quantity in the cart before updating
         const totalQuantity = cart.cart_products.reduce((acc, item) => acc + item.quantity, 0);
 
-        // Check if updating the quantity will exceed the cart limit
         const newTotalQuantity = totalQuantity - existingProduct.quantity + quantity;
         if (newTotalQuantity > cartLimit) {
             return res.status(400).json({ message: `Updating this product exceeds the cart limit of ${cartLimit} items.` });
         }
 
-        // Update the quantity of the existing product
         existingProduct.quantity = quantity;
 
         await cart.save();

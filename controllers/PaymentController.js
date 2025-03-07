@@ -5,22 +5,19 @@ const createCODPayment = async (req, res) => {
     try {
         const { orderID } = req.body;
 
-        // Fetch the order
         const order = await Order.findById(orderID);
         if (!order) {
             return res.status(404).json({ message: "Order not found!" });
         }
 
-        // Create payment details for COD
         const payment = new Payment({
             payment_method: "COD",
             amount: order.total_amount,
-            payment_status: "pending",  // COD payment is always pending until delivery
+            payment_status: "pending"
         });
 
         await payment.save();
 
-        // Link payment_id to the order
         order.paymentID = payment._id;
         await order.save();
 

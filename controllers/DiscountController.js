@@ -28,47 +28,99 @@ const getDiscountById = async (req, res) => {
 }
 
 //insert new discount
+// const insertDiscount = async (req, res) => {
+//     try {
+//         const { discount_type, discount_value,discount_description, discount_startDate, discount_endDate } = req.body;
+
+//         // Check for missing fields
+//         if (!discount_type || !discount_value || !discount_description||!discount_startDate || !discount_endDate) {
+//             return res.send({ message: "All the Fields are required..!" });
+//         }
+
+//         const validTypes = ["percentage", "flat"];
+//         if (!validTypes.includes(discount_type)) {
+//             return res.send({ message: "Invalid discount type. Use only 'percentage' or 'flat'." });
+//         }
+
+//         if (typeof discount_value !== "number" || discount_value <= 0) {
+//             return res.send({ message: "Discount value must be a number greater than zero." });
+//         }
+
+
+//         const StartDate = new Date(discount_startDate);
+//         const EndDate = new Date(discount_endDate);
+
+//         if (StartDate >= EndDate) {
+//             return res.send({ message: "End date must be later than start date." });
+//         }
+
+//         const newDiscount = new Discount({
+//             discount_type,
+//             discount_value,
+//             discount_description,
+//             discount_startDate: StartDate,
+//             discount_endDate: EndDate
+//         });
+
+//         await newDiscount.save();
+//         res.send({ message: "Discount Created Successfully..!", discount: newDiscount });
+
+//     } 
+//     catch (error) {
+//         res.send(error);
+//     }
+// };
+
 const insertDiscount = async (req, res) => {
     try {
-        const { discount_type, discount_value, discount_startDate, discount_endDate } = req.body;
+        console.log("Request Body:", req.body); // Debugging
 
-        // Check for missing fields
-        if (!discount_type || !discount_value || !discount_startDate || !discount_endDate) {
-            return res.send({ message: "All the Fields are required..!" });
+        const { discount_type, discount_value, discount_description, discount_startDate, discount_endDate } = req.body;
+
+        // Check if req.body is empty or missing fields
+        if (!discount_type || !discount_value || !discount_description || !discount_startDate || !discount_endDate) {
+            return res.status(400).send({ message: "All fields are required..!" });
         }
 
         const validTypes = ["percentage", "flat"];
         if (!validTypes.includes(discount_type)) {
-            return res.send({ message: "Invalid discount type. Use only 'percentage' or 'flat'." });
+            return res.status(400).send({ message: "Invalid discount type. Use only 'percentage' or 'flat'." });
         }
 
-        if (typeof discount_value !== "number" || discount_value <= 0) {
-            return res.send({ message: "Discount value must be a number greater than zero." });
+        // Ensure discount_value is a valid number
+        const discountValue = Number(discount_value);
+        if (isNaN(discountValue) || discountValue <= 0) {
+            return res.status(400).send({ message: "Discount value must be a number greater than zero." });
         }
 
-
+        // Validate date formats
         const StartDate = new Date(discount_startDate);
         const EndDate = new Date(discount_endDate);
-
+        if (isNaN(StartDate.getTime()) || isNaN(EndDate.getTime())) {
+            return res.status(400).send({ message: "Invalid date format." });
+        }
         if (StartDate >= EndDate) {
-            return res.send({ message: "End date must be later than start date." });
+            return res.status(400).send({ message: "End date must be later than start date." });
         }
 
+        // Save to database
         const newDiscount = new Discount({
             discount_type,
-            discount_value,
+            discount_value: discountValue,
+            discount_description,
             discount_startDate: StartDate,
             discount_endDate: EndDate
         });
 
         await newDiscount.save();
-        res.send({ message: "Discount Created Successfully..!", discount: newDiscount });
+        res.status(201).send({ message: "Discount Created Successfully..!", discount: newDiscount });
 
-    } 
-    catch (error) {
-        res.send(error);
+    } catch (error) {
+        console.error("Error inserting discount:", error);
+        res.status(500).send({ message: "Internal Server Error", error });
     }
 };
+
 
 //update Discount
 const updateDiscount = async (req, res) => {

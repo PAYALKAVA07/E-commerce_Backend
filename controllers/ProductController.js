@@ -9,7 +9,7 @@ const getAllProduct = async (req, res) => {
         const products = await Product.find().populate('categoryID discountID');
 
         if (!products.length) {
-            res.send({ message: "No Products Found..!" });
+            return res.send({ message: "No Products Found..!" });
         }
 
         const productWithReviews = await ReviewRating.aggregate([
@@ -26,38 +26,45 @@ const getAllProduct = async (req, res) => {
             const discount = p.discountID;
             const currentDate = new Date();
 
-            const iDiscountActive = discount && currentDate >= discount.discount_startDate && currentDate <= discount.discount_endDate;
+            const iDiscountActive = discount &&
+                currentDate >= discount.discount_startDate &&
+                currentDate <= discount.discount_endDate;
 
-            const finalPrice = iDiscountActive ?
-                Math.max(p.product_price - (discount.discount_type === "percentage"
-                    ? (p.product_price * discount.discount_value) / 100
-                    : discount.discount_value), 0)
+            const finalPrice = iDiscountActive
+                ? Math.max(
+                    p.product_price - (
+                        discount.discount_type === "percentage"
+                            ? (p.product_price * discount.discount_value) / 100
+                            : discount.discount_value
+                    ),
+                    0
+                )
                 : p.product_price;
 
-            const Reviews = productWithReviews.find(reviewe_rate => reviewe_rate._id.toString() === p._id.toString()) ?? { average_Rating: 0, total_Ratings: 0 };
+            const Reviews = productWithReviews.find(review => review._id?.toString() === p._id.toString()) ?? { average_Rating: 0, total_Ratings: 0 };
 
             return {
                 _id: p._id,
                 product_name: p.product_name,
                 product_images: p.product_images,
-                category_name: p.categoryID.category_name,
+                category_name: p.categoryID?.category_name || "Unknown",
                 original_price: p.product_price,
                 discount_price: finalPrice,
-                average_rating: Reviews.average_Rating.toFixed(1) || "0.0",
+                average_rating: Reviews.average_Rating ? Reviews.average_Rating.toFixed(1) : "0.0",
                 total_ratings: Reviews.total_Ratings || 0
             };
         });
 
-        res.send(allProducts)
-
+        res.send(allProducts);
     } catch (error) {
+        console.error("Error fetching products:", error); // Log the error for debugging
         res.status(500).json({ message: "Internal Server Error" });
     }
-}
+};
+
+
 
 // Get product by ID
-
-
 const getProductById = async (req, res) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -114,7 +121,6 @@ const getProductById = async (req, res) => {
         res.send(error);
     }
 };
-
 
 // Insert new product
 const insertProduct = async (req, res) => {
@@ -184,4 +190,19 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-module.exports = { getAllProduct, getProductById, insertProduct, updateProduct, deleteProduct };
+//best-selling product
+const getBestSellingProducts = async (req, res) => {
+    try {
+      // Find all products, sort them in descending order by total_ratings,
+      // and return only the first 10.
+      const bestSellingProducts = await Product.find({})
+        .sort({ total_ratings: -1 }) // descending sort on total_ratings
+        .limit(10);
+      res.status(200).json({message:"Best Selling Products",bestSellingProducts});
+    } catch (error) {
+      console.error("Error fetching best selling products:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
+module.exports = { getAllProduct, getProductById, insertProduct, updateProduct, deleteProduct,getBestSellingProducts };

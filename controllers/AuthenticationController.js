@@ -5,48 +5,47 @@ const User = require('../models/User');
 //registeration for new User
 const register_User = async (req, res) => {
     try {
-        console.log("Received Request Body:", req.body); // Debugging step
-
-        const { user_name, user_contact, user_email, user_password, user_confirmpassword, user_address, user_DOB, user_role } = req.body;
+        console.log("Received Request Body:", req.body); 
+        
+        const { user_firstName, user_lastName, user_email, user_contact, user_password, user_confirmpassword } = req.body;
         
         if (!user_email || !user_password || !user_confirmpassword) {
-            return res.status(400).json({ message: "Email & password are required..!" });
+            return res.status(400).json({ message: "Email & password are required!" });
         }
         if (user_password !== user_confirmpassword) {
-            return res.status(400).json({ message: "Password doesn't match!" });
+            return res.status(400).json({ message: "Passwords do not match!" });
         }
 
-        // Debug: Check if user exists
         const existingUser = await User.findOne({ user_email });
-        console.log("Existing User:", existingUser);
-
         if (existingUser) {
             return res.status(409).json({ message: "This user already exists!" });
         }
 
         const hashedPassword = await bcrypt.hash(user_password, 10);
-        console.log("Hashed Password:", hashedPassword);
 
         const newUser = new User({
-            user_name,
-            user_contact,
+            user_firstName,
+            user_lastName,
             user_email,
+            user_contact,
             user_password: hashedPassword,
-            user_address,
-            user_DOB,
-            user_role,
+            // user_role: "customer", 
+            // user_profile: "", 
+            // user_address: "", 
+            // user_DOB: null
         });
 
         await newUser.save();
-        console.log("New User Created:", newUser);
+        const token = jwt.sign({ userID: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        
+        console.log("New User Created:", user_firstName + " " + user_lastName);
 
-        res.status(201).json({ message: "User registered successfully!", user: newUser });
+        res.status(201).json({ token,message: "User registered successfully!", user: newUser });
     } catch (error) {
         console.error("Error during registration:", error);
         res.status(500).json({ message: "Internal Server Error", error });
     }
 };
-
 
 //login for existing user
 const login_User = async (req, res) => {
@@ -55,16 +54,17 @@ const login_User = async (req, res) => {
 
         const user = await User.findOne({ user_email });
         if (!user) {
-            return res.send({ isValid: false, message: "Invalid Username or Password..!" });
+            return res.status(400).json({ isValid: false, message: "User Not Found..!" });
         }
 
         const isMatch = await bcrypt.compare(user_password, user.user_password);
         if (!isMatch) {
-            return res.send({ isValid: false, message: "Invalid Username or Password..!" });
+            return res.status(400).json({ isValid: false, message: "Invalid Username or Password..!" });
         }
 
         const token = jwt.sign({ userID: user._id, role: user.user_role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-        res.send({ isValid: true, message: "Welcome", token });
+        
+        res.status(200).json({ token, userID:user._id});
     }
     catch (error) {
         res.send(error);

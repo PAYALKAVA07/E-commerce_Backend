@@ -5,7 +5,8 @@ const {authenticate,authorize} = require('../middleware/AuthenticationMiddleware
 const router = express.Router();
 
 //get All Category
-router.get("/", authenticate, authorize("getAllCategories"), getAllCategories);
+// router.get("/", authenticate, authorize("getAllCategories"), getAllCategories);
+router.get("/", getAllCategories);
 
 //get Category by id
 router.get("/:id", authenticate, authorize("getCategoryById"), getCategoryById);

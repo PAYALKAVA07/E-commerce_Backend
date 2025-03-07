@@ -5,7 +5,7 @@ const getAllCategories = async (req, res) => {
     try {
         const data = await Category.find();
         res.send(data);
-    } catch {
+    } catch(error) {
         res.send(error);
     }
 }

@@ -25,21 +25,20 @@ const getWishlistById = async (req, res) => {
 };
 
 // Get a specific product from the wishlist
-
 const getProductFromWishlist = async (req, res) => {
     try {
         const userID = req.user.userID; 
+        console.log(req.user);
         const wishlist = await Wishlist.findOne({ userID: userID }).populate('wishlist_products.productID');
         console.log(wishlist.wishlist_products)
-        // console.log(Product.find());
 
         if (!wishlist) {
             return res.status(404).json({ message: "Your wishlist is empty!" });
         }
-        // Return the wishlist with populated product details
         res.status(200).json(wishlist);
-    } catch (error) {
-        console.error("Error fetching wishlist:", error); // Log the error for debugging
+    } 
+    catch (error) {
+        console.error("Error fetching wishlist:", error); 
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
