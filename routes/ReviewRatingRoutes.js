@@ -7,13 +7,13 @@ const router = express.Router();
 router.get('/', authenticate, authorize("allReviewRating"), allReviewRating)
 
 //GET All ReviewRating of particular product by id
-router.get('/product/:productId', authenticate, authorize("Product_ReviewRating"), Product_ReviewRating)
+router.get('/product/:productID', authenticate, authorize("Product_ReviewRating"), Product_ReviewRating)
 
 //GET ReviewRating by id
 router.get('/:id', authenticate, authorize("getReviewRatingById"), getReviewRatingById);
 
 //insert ReviewRating
-router.post('/product/:productId', authenticate, authorize("insertReviewRating"), insertReviewRating);
+router.post('/product/:productID', authenticate, authorize("insertReviewRating"), insertReviewRating);
 
 //update ReviewRating
 router.patch('/:id', authenticate, authorize("updateReviewRating"), updateReviewRating);

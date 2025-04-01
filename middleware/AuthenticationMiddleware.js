@@ -5,7 +5,7 @@ const roles = require('../config/roles');
 const authenticate = (req, res, next) => {
     console.log("Headers:", req.headers);
 
-    const token = req.headers["value"];
+    const token = req.headers["authorization"];
     console.log("Token:", token);
 
     if (!token) {

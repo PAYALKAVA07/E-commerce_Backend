@@ -16,7 +16,7 @@ const allReviewRating = async (req, res) => {
 //get ReviewRating by product
 const Product_ReviewRating = async (req, res) => {
     try {
-        const ReviewRatings = await ReviewRating.find({ productID: req.params.productId });
+        const ReviewRatings = await ReviewRating.find({ productID: req.params.productID });
 
         if (!ReviewRatings.length) { 
             return res.status(404).json({ message: "There are no reviews & ratings available for this product." });
@@ -58,7 +58,7 @@ const insertReviewRating = async (req, res) => {
 
         const [userExists, productExists] = await Promise.all([
             User.findById(userID),
-            Product.findById(req.params.productId)
+            Product.findById(req.params.productID)
         ]);
 
         if (!userExists) return res.send({ message: 'User Not Found..!' });
@@ -66,7 +66,7 @@ const insertReviewRating = async (req, res) => {
 
         const newReview = new ReviewRating({ 
             userID, 
-            productID: req.params.productId, 
+            productID: req.params.productID, 
             review, 
             rating, 
             review_date: Date.now() 

@@ -47,11 +47,16 @@ const getAllProduct = async (req, res) => {
                 _id: p._id,
                 product_name: p.product_name,
                 product_images: p.product_images,
+                categoryID: p.categoryID?._id,
                 category_name: p.categoryID?.category_name || "Unknown",
+                product_description: p.product_description,
+                discount_value: p.discount_value,
                 original_price: p.product_price,
-                discount_price: finalPrice,
+                final_price: finalPrice,
                 average_rating: Reviews.average_Rating ? Reviews.average_Rating.toFixed(1) : "0.0",
-                total_ratings: Reviews.total_Ratings || 0
+                total_ratings: Reviews.total_Ratings || 0,
+                product_created_at: p.product_created_at,
+                product_updated_at: p.product_updated_at,
             };
         });
 
@@ -67,17 +72,17 @@ const getAllProduct = async (req, res) => {
 // Get product by ID
 const getProductById = async (req, res) => {
     try {
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        if (!mongoose.Types.ObjectId.isValid(req.params.productID)) {
             return res.send({ message: "Invalid Product ID Format" });
         }
-        const product = await Product.findById(req.params.id).populate('categoryID discountID');
+        const product = await Product.findById(req.params.productID).populate('categoryID discountID');
 
         if (!product) {
             return res.send({ message: "Product Not Found..!" });
         }
 
         const productWithReviews = await ReviewRating.aggregate([
-            { $match: { productID: new mongoose.Types.ObjectId(req.params.id) } },
+            { $match: { productID: new mongoose.Types.ObjectId(req.params.productID) } },
             {
                 $group: {
                     _id: "$productID",
@@ -110,8 +115,10 @@ const getProductById = async (req, res) => {
             product_name: product.product_name,
             product_images: product.product_images,
             category_name: product.categoryID.category_name,
+            product_description: product.product_description,
+            discount_value: product.discount_value,
             original_price: product.product_price,
-            discount_price: finalPrice,
+            final_price: finalPrice,
             average_rating: reviews.average_Rating?.toFixed(1) || "0.0",
             total_ratings: reviews.total_Ratings || 0
         });
@@ -191,18 +198,18 @@ const deleteProduct = async (req, res) => {
 };
 
 //best-selling product
-const getBestSellingProducts = async (req, res) => {
-    try {
-      // Find all products, sort them in descending order by total_ratings,
-      // and return only the first 10.
-      const bestSellingProducts = await Product.find({})
-        .sort({ total_ratings: -1 }) // descending sort on total_ratings
-        .limit(10);
-      res.status(200).json({message:"Best Selling Products",bestSellingProducts});
-    } catch (error) {
-      console.error("Error fetching best selling products:", error);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  };
+// const getBestSellingProducts = async (req, res) => {
+//     try {
+//       // Find all products, sort them in descending order by total_ratings,
+//       // and return only the first 10.
+//       const bestSellingProducts = await Product.find({})
+//         .sort({ total_ratings: -1 }) // descending sort on total_ratings
+//         .limit(10);
+//       res.status(200).json({message:"Best Selling Products",bestSellingProducts});
+//     } catch (error) {
+//       console.error("Error fetching best selling products:", error);
+//       res.status(500).json({ message: "Internal server error" });
+//     }
+//   };
 
-module.exports = { getAllProduct, getProductById, insertProduct, updateProduct, deleteProduct,getBestSellingProducts };
+module.exports = { getAllProduct, getProductById, insertProduct, updateProduct, deleteProduct };

@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/AuthenticationMiddleware');
-const { getAllCarts, getCartById, getProductFromCart, insertProductInCart, updateCartProduct, deleteProductFromCart, clearCart } = require('../controllers/CartController');
+const { getAllCarts, getCartById, getCartProducts,getProductFromCart, insertProductInCart, updateCartProduct, deleteProductFromCart, clearCart } = require('../controllers/CartController');
 
+// Get current user's cart products
+router.get("/products", authenticate, authorize("getCartProducts"), getCartProducts);
 
 // Get all carts (admin use case)
 router.get("/", authenticate, authorize("getAllCarts"), getAllCarts);

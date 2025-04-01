@@ -62,4 +62,18 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { getAllUsers, getUserById,  updateUser, deleteUser,  };
+//GET current User
+const getUser = async(req,res)=>{
+    try{
+        const userID = req.user.userID;
+        const users = await User.findById(userID);
+        if(!users){
+            return res.status(404).json({ message: "User not found!" });
+        }
+        res.json(users)
+    }catch(error){
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+}
+
+module.exports = { getAllUsers, getUserById,  updateUser, deleteUser,getUser  };

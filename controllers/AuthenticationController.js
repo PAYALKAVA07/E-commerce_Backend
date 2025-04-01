@@ -36,7 +36,7 @@ const register_User = async (req, res) => {
         });
 
         await newUser.save();
-        const token = jwt.sign({ userID: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign({ userID: newUser._id, role: newUser.user_role }, process.env.JWT_SECRET, { expiresIn: "1h" });
         
         console.log("New User Created:", user_firstName + " " + user_lastName);
 
